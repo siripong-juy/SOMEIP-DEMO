@@ -26,19 +26,19 @@ A small demo showing how a signal-based **CAN** message (Classic Platform style)
 
 | ID | Requirement |
 |---|---|
-| FR-01 | The system shall send a CAN frame (ID `0x123`, 2-byte big-endian raw speed, 0.01 km/h resolution) every 100 ms. |
+| FR-01 | The system shall send a CAN frame (standard 11-bit ID `0x123`, DLC 2, 2-byte big-endian raw speed, 0.01 km/h resolution) every 100 ms. |
 | FR-02 | The gateway shall receive CAN ID `0x123` and ignore all other IDs. |
 | FR-03 | The gateway shall convert the raw value to a 32-bit float (km/h). |
 | FR-04 | The gateway shall send a SOME/IP NOTIFICATION (service `0x1234`, event `0x8001`) with an incrementing session ID (1..65535, wrapping). |
 | FR-05 | The subscriber shall decode and print service ID, event ID, session ID and speed. |
-| FR-06 | The SOME/IP header shall be 16 bytes, big-endian, with the Length field = 8 + payload length. |
+| FR-06 | The SOME/IP header shall be 16 bytes, big-endian, with the Length field = 8 + payload length, Client ID `0x0000`, Protocol Version `0x01`, Interface Version `0x01`, Message Type `0x02` (NOTIFICATION) and Return Code `0x00` (E_OK). |
 
 ### Non-functional / environment requirements
 
 | ID | Requirement |
 |---|---|
 | NFR-01 | Runs on Windows 11, Python 3.10 or newer. |
-| NFR-02 | No admin rights or Linux components needed. |
+| NFR-02 | No admin rights or Linux components needed. (Windows Firewall may prompt for `python.exe` on first run; it can be dismissed, loopback traffic still works.) |
 | NFR-03 | Python packages: `python-can`, `msgpack`, `pytest`. |
 | NFR-04 | Network: UDP multicast `239.0.0.1` (CAN simulation), UDP `127.0.0.1:30509` (SOME/IP). |
 | NFR-05 | Optional: Wireshark + Npcap to inspect SOME/IP packets. |
@@ -55,6 +55,7 @@ someip-demo/
 ├── subscriber.py      # simulated AP service
 ├── test_someip.py     # unit tests
 ├── requirements.txt   # pinned Python dependencies
+├── .gitignore         # .venv/, __pycache__/, .pytest_cache/
 ├── PLAN.md            # implementation plan
 └── README.md
 ```
@@ -63,12 +64,12 @@ someip-demo/
 
 ## Setup (PowerShell)
 
+From the cloned repository folder:
+
 ```powershell
-mkdir someip-demo; cd someip-demo
-py -3.10 -m venv .venv
+py -3 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install python-can msgpack pytest
-pip freeze > requirements.txt
+pip install -r requirements.txt
 ```
 
 If script activation is blocked, run this once (no admin rights needed):
